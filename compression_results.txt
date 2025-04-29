@@ -1,0 +1,14 @@
+
+Detailed Performance Results:
+------------------------
+Regular Model:
+  - Average Inference Time: 0.0045s
+  - Average Memory Usage: 0.00MB
+
+Compressed Model:
+  - Average Inference Time: 0.0004s
+  - Average Memory Usage: 0.00MB
+
+Performance Improvements:
+  - Time Improvement: 90.79% faster with compression
+  - Memory Usage: The memory comparison shows very small values, which is why we got the 'nan%' improvement (division by near-zero numbers)

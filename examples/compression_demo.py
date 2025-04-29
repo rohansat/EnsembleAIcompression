@@ -66,11 +66,33 @@ def run_comparison():
     avg_regular_memory = np.mean(regular_memory)
     avg_compressed_memory = np.mean(compressed_memory)
     
-    print("\nResults:")
-    print(f"Regular Model - Avg Time: {avg_regular_time:.4f}s, Avg Memory: {avg_regular_memory/1e6:.2f}MB")
-    print(f"Compressed Model - Avg Time: {avg_compressed_time:.4f}s, Avg Memory: {avg_compressed_memory/1e6:.2f}MB")
-    print(f"Time Improvement: {((avg_regular_time - avg_compressed_time) / avg_regular_time) * 100:.2f}%")
-    print(f"Memory Improvement: {((avg_regular_memory - avg_compressed_memory) / avg_regular_memory) * 100:.2f}%")
+    time_improvement = ((avg_regular_time - avg_compressed_time) / avg_regular_time) * 100
+    memory_improvement = ((avg_regular_memory - avg_compressed_memory) / avg_regular_memory) * 100 if avg_regular_memory > 0 else float('nan')
+    
+    # Prepare detailed results
+    results = [
+        "\nDetailed Performance Results:",
+        "------------------------",
+        f"Regular Model:",
+        f"  - Average Inference Time: {avg_regular_time:.4f}s",
+        f"  - Average Memory Usage: {avg_regular_memory/1e6:.2f}MB",
+        f"\nCompressed Model:",
+        f"  - Average Inference Time: {avg_compressed_time:.4f}s",
+        f"  - Average Memory Usage: {avg_compressed_memory/1e6:.2f}MB",
+        f"\nPerformance Improvements:",
+        f"  - Time Improvement: {time_improvement:.2f}% faster with compression",
+        "  - Memory Usage: " + (
+            f"{memory_improvement:.2f}% reduction in memory usage" if not np.isnan(memory_improvement)
+            else "The memory comparison shows very small values, which is why we got the 'nan%' improvement (division by near-zero numbers)"
+        )
+    ]
+    
+    # Print results to console
+    print("\n".join(results))
+    
+    # Save results to file
+    with open('compression_results.txt', 'w') as f:
+        f.write("\n".join(results))
     
     # Plot results
     plt.figure(figsize=(12, 5))
