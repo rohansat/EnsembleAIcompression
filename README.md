@@ -32,8 +32,4 @@ Our compression approach shows significant improvements:
 ├── src/               # Core compression logic
 ├── tests/             # Test suite
 └── requirements.txt   # Project dependencies
-```
-
-## License
-
-MIT License 
+``` 
