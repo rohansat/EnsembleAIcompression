@@ -1,7 +1,7 @@
 import os
 import sys
 
-# Add the project root directory to the Python path
+# Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
@@ -12,97 +12,97 @@ import matplotlib.pyplot as plt
 from src.adaptive_ndlinear import AdaptiveNdLinear, AdaptiveCompressor
 
 def generate_sample_data(batch_size, input_dim, num_samples):
-    """Generate synthetic data for testing."""
+    """Generate test data for benchmarking compression performance"""
     X = torch.randn(num_samples, batch_size, input_dim)
-    y = torch.randn(num_samples, batch_size, input_dim // 2)  # Smaller output dimension
+    y = torch.randn(num_samples, batch_size, input_dim // 2)
     return X, y
 
 def run_comparison():
-    # Parameters
+    # Model configuration
     input_dim = 1024
     output_dim = 512
     batch_size = 32
     num_samples = 100
     
-    # Generate sample data
+    # Load test data
     X, y = generate_sample_data(batch_size, input_dim, num_samples)
     
-    # Create models
+    # Initialize models
     regular_model = AdaptiveNdLinear((input_dim,), (output_dim,))
     
-    # Create compressed model with adaptive compression
+    # TODO: Experiment with different compression settings
     compressor = AdaptiveCompressor(
-        target_latency=0.1,
-        target_memory=0.5,
-        min_compression=0.3,
-        max_compression=0.9
+        target_latency=0.1,    # 100ms target
+        target_memory=0.5,     # 50% memory target
+        min_compression=0.3,   # Minimum 30% compression
+        max_compression=0.9    # Maximum 90% compression
     )
     compressed_model = AdaptiveNdLinear((input_dim,), (output_dim,), compressor)
     
-    # Metrics storage
-    regular_times = []
-    compressed_times = []
+    # Performance tracking
+    regular_latencies = []
+    compressed_latencies = []
     regular_memory = []
     compressed_memory = []
     
-    # Run comparison
-    print("Running comparison...")
+    print("Running comparison with larger model dimensions...")
     for i in range(num_samples):
-        # Regular model
+        # Measure regular model performance
+        _ = regular_model(X[i])  # Warm-up run
         start_time = time.time()
         _ = regular_model(X[i])
-        regular_times.append(time.time() - start_time)
+        regular_latencies.append(time.time() - start_time)
         regular_memory.append(torch.cuda.memory_allocated() if torch.cuda.is_available() else 0)
         
-        # Compressed model
+        # Measure compressed model performance
+        _ = compressed_model(X[i])  # Warm-up run
         start_time = time.time()
         _ = compressed_model(X[i])
-        compressed_times.append(time.time() - start_time)
+        compressed_latencies.append(time.time() - start_time)
         compressed_memory.append(torch.cuda.memory_allocated() if torch.cuda.is_available() else 0)
         
-    # Calculate statistics
-    avg_regular_time = np.mean(regular_times)
-    avg_compressed_time = np.mean(compressed_times)
+    # Calculate metrics
+    avg_regular_latency = np.mean(regular_latencies)
+    avg_compressed_latency = np.mean(compressed_latencies)
     avg_regular_memory = np.mean(regular_memory)
     avg_compressed_memory = np.mean(compressed_memory)
     
-    time_improvement = ((avg_regular_time - avg_compressed_time) / avg_regular_time) * 100
+    latency_improvement = ((avg_regular_latency - avg_compressed_latency) / avg_regular_latency) * 100
     memory_improvement = ((avg_regular_memory - avg_compressed_memory) / avg_regular_memory) * 100 if avg_regular_memory > 0 else float('nan')
     
-    # Prepare detailed results
+    # Format results
     results = [
         "\nDetailed Performance Results:",
         "------------------------",
         f"Regular Model:",
-        f"  - Average Inference Time: {avg_regular_time:.4f}s",
+        f"  - Average Latency: {avg_regular_latency:.4f}s",
         f"  - Average Memory Usage: {avg_regular_memory/1e6:.2f}MB",
         f"\nCompressed Model:",
-        f"  - Average Inference Time: {avg_compressed_time:.4f}s",
+        f"  - Average Latency: {avg_compressed_latency:.4f}s",
         f"  - Average Memory Usage: {avg_compressed_memory/1e6:.2f}MB",
         f"\nPerformance Improvements:",
-        f"  - Time Improvement: {time_improvement:.2f}% faster with compression",
+        f"  - Latency Improvement: {latency_improvement:.2f}% faster with compression",
         "  - Memory Usage: " + (
             f"{memory_improvement:.2f}% reduction in memory usage" if not np.isnan(memory_improvement)
             else "The memory comparison shows very small values, which is why we got the 'nan%' improvement (division by near-zero numbers)"
         )
     ]
     
-    # Print results to console
     print("\n".join(results))
     
-    # Save results to file
+    # Save benchmark results
     with open('compression_results.txt', 'w') as f:
         f.write("\n".join(results))
     
-    # Plot results
+    # Generate comparison plots
     plt.figure(figsize=(12, 5))
     
     plt.subplot(1, 2, 1)
-    plt.plot(regular_times, label='Regular')
-    plt.plot(compressed_times, label='Compressed')
-    plt.title('Inference Time Comparison')
+    plt.plot(regular_latencies, label='Regular')
+    plt.plot(compressed_latencies, label='Compressed')
+    plt.title('Latency Comparison')
     plt.xlabel('Sample')
-    plt.ylabel('Time (s)')
+    plt.ylabel('Latency (s)')
     plt.legend()
     
     plt.subplot(1, 2, 2)
