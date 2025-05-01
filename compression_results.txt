@@ -2,13 +2,19 @@
 Detailed Performance Results:
 ------------------------
 Regular Model:
-  - Average Latency: 0.0053s
+  - Average Latency: 0.0001s
   - Average Memory Usage: 0.00MB
+  - Average Accuracy: 0.19%
+  - Average RMSE: 9.8660
 
 Compressed Model:
-  - Average Latency: 0.0004s
+  - Average Latency: 0.0001s
   - Average Memory Usage: 0.00MB
+  - Average Accuracy: 0.03%
+  - Average RMSE: 46.1792
 
 Performance Improvements:
-  - Latency Improvement: 92.87% faster with compression
+  - Latency Improvement: 2.07% faster with compression
+  - Accuracy Impact: -0.16% with compression
+  - RMSE Change: +36.3132 with compression
   - Memory Usage: The memory comparison shows very small values, which is why we got the 'nan%' improvement (division by near-zero numbers)

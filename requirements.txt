@@ -4,4 +4,5 @@ numpy>=1.21.0
 psutil>=5.8.0  # For system monitoring
 pytest>=7.0.0  # For testing
 tqdm>=4.65.0   # For progress bars
+scikit-learn>=1.6.0  # For accuracy metrics
 git+https://github.com/ensemble-core/NdLinear.git  # NdLinear package 
